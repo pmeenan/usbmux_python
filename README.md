@@ -1,2 +1,2 @@
 # usbmux_python
-Python interface for USBMux packaged as a pip module.
+Python interface for USBMux packaged as a pip module. This is just a repackaging of the original (unmaintained) usbmux.py that was part of the tcprelay sample in the original libusbmuxd project.
