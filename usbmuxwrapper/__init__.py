@@ -44,10 +44,10 @@ class SafeStreamSocket:
 				raise MuxError("socket connection broken")
 			totalsent = totalsent + sent
 	def recv(self, size):
-		msg = ''
+		msg = b''
 		while len(msg) < size:
 			chunk = self.sock.recv(size-len(msg))
-			if chunk == '':
+			if chunk == b'':
 				raise MuxError("socket connection broken")
 			msg = msg + chunk
 		return msg
@@ -74,9 +74,9 @@ class BinaryProtocol(object):
 
 	def _pack(self, req, payload):
 		if req == self.TYPE_CONNECT:
-			return struct.pack("IH", payload['DeviceID'], payload['PortNumber']) + "\x00\x00"
+			return struct.pack("IH", payload['DeviceID'], payload['PortNumber']) + b"\x00\x00"
 		elif req == self.TYPE_LISTEN:
-			return ""
+			return b""
 		else:
 			raise ValueError("Invalid outgoing request type %d"%req)
 	
@@ -85,7 +85,7 @@ class BinaryProtocol(object):
 			return {'Number':struct.unpack("I", payload)[0]}
 		elif resp == self.TYPE_DEVICE_ADD:
 			devid, usbpid, serial, pad, location = struct.unpack("IH256sHI", payload)
-			serial = serial.split("\0")[0]
+			serial = serial.split(b"\0")[0]
 			return {'DeviceID': devid, 'Properties': {'LocationID': location, 'SerialNumber': serial, 'ProductID': usbpid}}
 		elif resp == self.TYPE_DEVICE_REMOVE:
 			devid = struct.unpack("I", payload)[0]
@@ -137,12 +137,12 @@ class PlistProtocol(BinaryProtocol):
 			req = [self.TYPE_CONNECT, self.TYPE_LISTEN][req-2]
 		payload['MessageType'] = req
 		payload['ProgName'] = 'tcprelay'
-		BinaryProtocol.sendpacket(self, self.TYPE_PLIST, tag, plistlib.writePlistToString(payload))
+		BinaryProtocol.sendpacket(self, self.TYPE_PLIST, tag, plistlib.writePlistToBytes(payload))
 	def getpacket(self):
 		resp, tag, payload = BinaryProtocol.getpacket(self)
 		if resp != self.TYPE_PLIST:
 			raise MuxError("Received non-plist type %d"%resp)
-		payload = plistlib.readPlistFromString(payload)
+		payload = plistlib.readPlistFromBytes(payload)
 		return payload['MessageType'], tag, payload
 
 class MuxConnection(object):

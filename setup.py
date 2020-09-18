@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="usbmuxwrapper",
-    version="0.0.2",
+    version="0.0.3",
     author="Patrick Meenan",
     author_email="pmeenan@webpagetest.org",
     description="Python wrapper for usbmux",
